@@ -2,40 +2,45 @@ name: 股票盘前晨报
 
 on:
   schedule:
-    # 北京时间 06:30 = UTC 22:30（前一日）；仅周一至周五
-    - cron: '30 22 * * 1-7'
-  workflow_dispatch:
+    # 北京时间 06:30（UTC+8）= UTC 前一天 22:30；周一~周五 = UTC 周日~周四
+    - cron: "30 22 * * 0-6"
+  workflow_dispatch: {}
 
 permissions:
   contents: write
 
 jobs:
-  report:
+  morning-report:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: 检出代码
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 设置 Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
-      - name: 安装依赖
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install httpx beautifulsoup4 lxml apscheduler python-dotenv
 
-      - name: 生成盘前晨报
+      - name: Generate report & push to Feishu (optional)
         env:
           LARK_WEBHOOK: ${{ secrets.LARK_WEBHOOK }}
+          LARK_SECRET: ${{ secrets.LARK_SECRET }}
         run: python main.py --now
 
-      - name: 提交报告回仓库
+      - name: Commit report back to repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add reports/
-          git commit -m "chore: 自动生成盘前晨报 $(date +%Y-%m-%d)" || echo "no changes"
-          git push
+          if git diff --cached --quiet; then
+            echo "无新报告，跳过提交"
+          else
+            git commit -m "chore: 盘前晨报 $(TZ=Asia/Shanghai date +'%Y-%m-%d')"
+            git push
+          fi
