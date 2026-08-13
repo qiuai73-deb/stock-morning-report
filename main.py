@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import sys
 from datetime import datetime
 
@@ -13,7 +14,7 @@ from collectors import (
     MacroNewsCollector,
     CapitalFlowCollector,
 )
-from notifiers import ConsoleNotifier, FileNotifier
+from notifiers import ConsoleNotifier, FileNotifier, FeishuNotifier
 from report import ReportGenerator
 from scheduler import Scheduler
 
@@ -65,6 +66,8 @@ async def generate_and_notify():
         ConsoleNotifier(),
         FileNotifier(),
     ]
+    if os.getenv("LARK_WEBHOOK"):
+        notifiers.append(FeishuNotifier())
 
     for notifier in notifiers:
         try:
