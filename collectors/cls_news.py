@@ -30,7 +30,7 @@ class CLSNewsCollector(BaseCollector):
         return MarketData(category=self.category, items=items)
 
     async def _fetch_cls_roll(self) -> list[dict]:
-        url = "https://www.cls.cn/nodeapi/telegraphList"
+        url = "https://www.cls.cn"
         params = {
             "app": "CailianpressWeb",
             "os": "web",
