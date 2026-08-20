@@ -1,9 +1,9 @@
 name: 股票盘前晨报
 
 on:
-  schedule:
+#  schedule:
     # 北京时间 06:30（UTC+8）= UTC 前一天 22:30；周一~周五 = UTC 周日~周四
-    - cron: "30 22 * * 0-6"
+#    - cron: "30 22 * * 0-6"
   workflow_dispatch: {}
 
 permissions:
